@@ -1,17 +1,23 @@
-# Agente Duplo – IAGents
+# 🧾 IAGents - Análise de Notas Fiscais Públicas
 
-Sistema para análise de notas fiscais públicas com IA Generativa e visualização interativa via Streamlit.
+Este projeto permite ao usuário consultar dados públicos de notas fiscais (CSV) com uma interface de IA generativa.
 
-## 🚀 Como rodar o projeto
+## 🚀 Executar localmente
 
-1. Instale as dependências:
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
+streamlit run app/main.py
 ```
 
-2. Configure sua chave da API no .env ou diretamente na interface
+## 🌐 Modelos suportados
+- ✅ deepseek-chat (padrão)
+- OpenAI, Mistral, OpenRouter...
 
-3. Rode localmente:
-```bash
-streamlit run main.py
+## 🔐 .env (exemplo)
+```
+MODEL=deepseek-chat
+API_KEY=sua-chave-aqui
+API_URL=https://api.deepseek.com/v1
 ```

@@ -1,4 +1,10 @@
 pandas
 streamlit
-langchain
 python-dotenv
+tabulate
+openai
+
+langchain==0.1.14
+langchain-core==0.1.46
+langchain-community==0.0.30
+langchain-openai==0.0.8
