@@ -5,8 +5,8 @@ from langchain.schema.messages import HumanMessage
 def responder_pergunta(pergunta, df_header, df_items, modelo, url, api_key):
     try:
         # Seleciona uma amostra razoável para o modelo entender o conteúdo sem estourar o limite de tokens
-        header_sample = df_header.head(10).to_markdown(index=False)
-        items_sample = df_items.head(10).to_markdown(index=False)
+        header_sample = df_header.head(100).to_markdown(index=False)
+        items_sample = df_items.head(100).to_markdown(index=False)
 
         prompt = f"""
 Você é um agente de IA especializado em análise de dados públicos, com foco em notas fiscais brasileiras.
