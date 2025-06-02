@@ -1,30 +1,44 @@
+
 from llm_selector import get_llm
 from langchain.schema.messages import HumanMessage
 
 
-def resumir_df_header(df):
+def resumo_cabecalho(df):
     return {
         "total_notas": len(df),
-        "valor_total": df["valorTotal"].sum(),
-        "media_valor": df["valorTotal"].mean(),
-        "fornecedor_mais_frequente": df["nomeFornecedor"].mode()[0] if not df["nomeFornecedor"].mode().empty else "N/A",
+        "valor_total": df["VALOR NOTA FISCAL"].sum(),
+        "valor_médio": df["VALOR NOTA FISCAL"].mean(),
+        "valor_máximo": df["VALOR NOTA FISCAL"].max(),
+        "valor_mínimo": df["VALOR NOTA FISCAL"].min(),
+        "nota_maior_valor": df.loc[df["VALOR NOTA FISCAL"].idxmax()].to_dict(),
+        "uf_emitente_mais_comum": df["UF EMITENTE"].mode()[0],
+        "destino_mais_comum": df["DESTINO DA OPERAÇÃO"].mode()[0],
+        "presença_comprador_mais_comum": df["PRESENÇA DO COMPRADOR"].mode()[0],
+        "total_emitentes_distintos": df["RAZÃO SOCIAL EMITENTE"].nunique(),
+        "destinatário_mais_comum": df["NOME DESTINATÁRIO"].mode()[0],
     }
 
 
-def resumir_df_items(df):
+def resumo_itens(df):
     return {
         "total_itens": len(df),
-        "item_mais_frequente": df["descricaoItem"].mode()[0] if not df["descricaoItem"].mode().empty else "N/A",
-        "maior_quantidade": df["quantidadeItem"].max(),
-        "item_maior_valor_unitario": df.sort_values(by="valorUnitarioItem", ascending=False)["descricaoItem"].iloc[0]
-        if not df.empty else "N/A",
+        "quantidade_total": df["QUANTIDADE"].sum(),
+        "quantidade_média": df["QUANTIDADE"].mean(),
+        "valor_unitário_médio": df["VALOR UNITÁRIO"].mean(),
+        "valor_total_geral": df["VALOR TOTAL"].sum(),
+        "item_mais_comum": df["DESCRIÇÃO DO PRODUTO/SERVIÇO"].mode()[0],
+        "item_maior_valor_unitario": df.loc[df["VALOR UNITÁRIO"].idxmax()].to_dict(),
+        "item_maior_valor_total": df.loc[df["VALOR TOTAL"].idxmax()].to_dict(),
+        "tipo_produto_mais_comum": df["NCM/SH (TIPO DE PRODUTO)"].mode()[0],
+        "unidade_mais_utilizada": df["UNIDADE"].mode()[0],
+        "nota_com_mais_itens": df["CHAVE DE ACESSO"].value_counts().idxmax(),
     }
 
 
 def responder_pergunta(pergunta, df_header, df_items, modelo, url, api_key):
     try:
-        resumo_header = resumir_df_header(df_header)
-        resumo_items = resumir_df_items(df_items)
+        resumo_header = resumo_cabecalho(df_header)
+        resumo_items = resumo_itens(df_items)
 
         prompt = f"""
 Você é um agente de IA especializado em análise de dados públicos, com foco em notas fiscais brasileiras.
@@ -36,14 +50,36 @@ Sua tarefa é responder perguntas com base nas informações abaixo. Os dados fo
 📊 **Resumo: Cabeçalho das Notas Fiscais**
 - Total de notas fiscais: {resumo_header['total_notas']}
 - Valor total: R$ {resumo_header['valor_total']:,.2f}
-- Valor médio: R$ {resumo_header['media_valor']:,.2f}
-- Fornecedor mais frequente: {resumo_header['fornecedor_mais_frequente']}
+- Valor médio: R$ {resumo_header['valor_médio']:,.2f}
+- Valor máximo: R$ {resumo_header['valor_máximo']:,.2f}
+- Valor mínimo: R$ {resumo_header['valor_mínimo']:,.2f}
+- UF emitente mais comum: {resumo_header['uf_emitente_mais_comum']}
+- Destino mais comum: {resumo_header['destino_mais_comum']}
+- Presença do comprador mais comum: {resumo_header['presença_comprador_mais_comum']}
+- Total de emitentes distintos: {resumo_header['total_emitentes_distintos']}
+- Destinatário mais comum: {resumo_header['destinatário_mais_comum']}
 
-📊 **Resumo: Itens das Notas Fiscais**
+📄 **Nota com maior valor:**
+{resumo_header['nota_maior_valor']}
+
+---
+
+📦 **Resumo: Itens das Notas Fiscais**
 - Total de itens: {resumo_items['total_itens']}
-- Item mais frequente: {resumo_items['item_mais_frequente']}
-- Maior quantidade em um item: {resumo_items['maior_quantidade']}
-- Item com maior valor unitário: {resumo_items['item_maior_valor_unitario']}
+- Quantidade total: {resumo_items['quantidade_total']}
+- Quantidade média por item: {resumo_items['quantidade_média']:.2f}
+- Valor unitário médio: R$ {resumo_items['valor_unitário_médio']:,.2f}
+- Valor total geral: R$ {resumo_items['valor_total_geral']:,.2f}
+- Item mais comum: {resumo_items['item_mais_comum']}
+- Tipo de produto mais comum (NCM): {resumo_items['tipo_produto_mais_comum']}
+- Unidade mais utilizada: {resumo_items['unidade_mais_utilizada']}
+- Nota com maior número de itens: {resumo_items['nota_com_mais_itens']}
+
+📄 **Item com maior valor unitário:**
+{resumo_items['item_maior_valor_unitario']}
+
+📄 **Item com maior valor total:**
+{resumo_items['item_maior_valor_total']}
 
 ---
 
